@@ -20,6 +20,8 @@ export type QuoteFormData = {
   serviceNeeded: (typeof SERVICE_OPTIONS)[number] | "";
   homeSize: (typeof HOME_SIZE_OPTIONS)[number] | "";
   message: string;
+  /** Honeypot — must stay empty */
+  botcheck?: string;
 };
 
 export type QuoteValidationErrors = Partial<
@@ -69,16 +71,90 @@ export function validateQuoteForm(
     errors.homeSize = "Please select a valid home size.";
   }
 
+  if (data.botcheck) {
+    errors.botcheck = "Spam detected.";
+  }
+
   return errors;
 }
 
 /**
  * Form handling abstraction.
- * Connect email, CRM, webhook, or database here without changing the UI.
+ * Primary: Web3Forms (client-side). Optional: QUOTE_WEBHOOK_URL via /api/quote/.
  */
 export type QuoteSubmissionResult =
   | { ok: true; id: string }
   | { ok: false; error: string; fieldErrors?: QuoteValidationErrors };
+
+function buildMessageBody(data: QuoteFormData): string {
+  return [
+    `Service Needed: ${data.serviceNeeded}`,
+    `Home Size: ${data.homeSize || "Not provided"}`,
+    `Property: ${data.address}`,
+    `Phone: ${data.phone}`,
+    `Email: ${data.email || "Not provided"}`,
+    "",
+    data.message.trim() || "(No additional message)",
+  ].join("\n");
+}
+
+export async function submitQuoteToWeb3Forms(
+  data: QuoteFormData,
+  accessKey: string,
+): Promise<QuoteSubmissionResult> {
+  const fieldErrors = validateQuoteForm(data);
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      ok: false,
+      error: "Please fix the highlighted fields.",
+      fieldErrors,
+    };
+  }
+
+  try {
+    const response = await fetch("https://api.web3forms.com/submit", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+      body: JSON.stringify({
+        access_key: accessKey,
+        subject: `New Quote Request — ${data.serviceNeeded || "Website"}`,
+        from_name: "Arizona Gutter Guardians Website",
+        name: data.name.trim(),
+        phone: data.phone.trim(),
+        email: data.email.trim() || undefined,
+        address: data.address.trim(),
+        service_needed: data.serviceNeeded,
+        home_size: data.homeSize || "Not provided",
+        message: buildMessageBody(data),
+        botcheck: false,
+      }),
+    });
+
+    const result = (await response.json()) as {
+      success?: boolean;
+      message?: string;
+    };
+
+    if (!response.ok || !result.success) {
+      return {
+        ok: false,
+        error:
+          result.message ||
+          "We could not submit your request right now. Please call us.",
+      };
+    }
+
+    return { ok: true, id: `web3forms_${Date.now()}` };
+  } catch {
+    return {
+      ok: false,
+      error: "We could not submit your request right now. Please call us.",
+    };
+  }
+}
 
 export async function submitQuote(
   data: QuoteFormData,
@@ -92,7 +168,6 @@ export async function submitQuote(
     };
   }
 
-  // Placeholder adapter — replace with Resend, Formspree, CRM webhook, etc.
   const payload = {
     ...data,
     submittedAt: new Date().toISOString(),

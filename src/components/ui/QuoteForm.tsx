@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import {
   HOME_SIZE_OPTIONS,
   SERVICE_OPTIONS,
+  submitQuoteToWeb3Forms,
   type QuoteFormData,
   type QuoteValidationErrors,
   validateQuoteForm,
@@ -19,7 +20,10 @@ const initial: QuoteFormData = {
   serviceNeeded: "",
   homeSize: "",
   message: "",
+  botcheck: "",
 };
+
+const web3formsKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ?? "";
 
 export function QuoteForm() {
   const [form, setForm] = useState<QuoteFormData>(initial);
@@ -46,18 +50,37 @@ export function QuoteForm() {
     setServerError("");
 
     try {
-      const response = await fetch("/api/quote/", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
-      const result = (await response.json()) as {
+      let result: {
         ok: boolean;
         error?: string;
         fieldErrors?: QuoteValidationErrors;
       };
 
-      if (!response.ok || !result.ok) {
+      if (web3formsKey) {
+        result = await submitQuoteToWeb3Forms(form, web3formsKey);
+      } else {
+        const response = await fetch("/api/quote/", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(form),
+        });
+        result = (await response.json()) as {
+          ok: boolean;
+          error?: string;
+          fieldErrors?: QuoteValidationErrors;
+        };
+        if (!response.ok) {
+          result = {
+            ...result,
+            ok: false,
+            error:
+              result.error ??
+              "Something went wrong. Please try again or call us.",
+          };
+        }
+      }
+
+      if (!result.ok) {
         if (result.fieldErrors) setErrors(result.fieldErrors);
         setServerError(
           result.error ?? "Something went wrong. Please try again or call us.",
@@ -110,6 +133,20 @@ export function QuoteForm() {
 
   return (
     <form onSubmit={onSubmit} className="space-y-5" noValidate>
+      {/* Honeypot — leave empty; hidden from users */}
+      <div className="hidden" aria-hidden="true">
+        <label htmlFor="botcheck">Company</label>
+        <input
+          id="botcheck"
+          name="botcheck"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+          value={form.botcheck ?? ""}
+          onChange={(e) => update("botcheck", e.target.value)}
+        />
+      </div>
+
       <div className="grid gap-5 sm:grid-cols-2">
         <Field label="Name" htmlFor="name" required error={errors.name}>
           <input

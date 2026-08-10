@@ -32,7 +32,10 @@ npm start
 
 ## Quote form
 
-Submissions hit `POST /api/quote/`. Without `QUOTE_WEBHOOK_URL`, successful validation returns a success state and logs in development — wire email/CRM via the webhook env var.
+Submissions use **Web3Forms** via `NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY` (set in `.env.local` and Vercel).
+
+Optional fallback: `QUOTE_WEBHOOK_URL` through `POST /api/quote/`.
+
 
 ## Placeholders to replace
 
