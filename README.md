@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Arizona Gutter Guardians
 
-## Getting Started
+Production-ready marketing website for **Arizona Gutter Guardians** (`azgutterguardians.com`) — gutter guard installation, cleaning, and repair across Arizona’s White Mountains (Show Low, Lakeside, Pinetop).
 
-First, run the development server:
+## Stack
+
+- Next.js (App Router) + TypeScript
+- Tailwind CSS
+- Server-rendered pages with minimal client JS (header menu, quote form, sticky CTA)
+
+## Develop
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+```bash
+npm run build
+npm start
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Key config
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| File | Purpose |
+|------|---------|
+| `src/config/business.ts` | Business name, phone, cities, services, schema ID |
+| `src/config/analytics.ts` | GA4 / Search Console placeholders |
+| `.env.example` | Env var template |
+| `docs/SEO-STRATEGY.md` | SEO + off-page checklist |
+| `docs/SCHEMA.md` | JSON-LD documentation |
 
-## Learn More
+## Quote form
 
-To learn more about Next.js, take a look at the following resources:
+Submissions hit `POST /api/quote/`. Without `QUOTE_WEBHOOK_URL`, successful validation returns a success state and logs in development — wire email/CRM via the webhook env var.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Placeholders to replace
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. Phone number in `src/config/business.ts`
+2. Analytics / verification IDs in `.env.local`
+3. `public/images/og-default.jpg` (Open Graph image)
+4. Privacy & Terms legal copy
+5. Real photography in place of gradient placeholders
