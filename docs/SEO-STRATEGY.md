@@ -118,6 +118,41 @@ City pages describe coverage for one business — not fake branch locations.
 
 ---
 
+## Robots & Sitemap
+
+### Locations
+- Robots: `src/app/robots.ts` → served at `/robots.txt`
+- Sitemap: `src/app/sitemap.ts` → served at `/sitemap.xml`
+- Canonical site origin: `business.siteUrl` in `src/config/business.ts` (`https://azgutterguardians.com`)
+
+### Production URLs
+- https://azgutterguardians.com/robots.txt
+- https://azgutterguardians.com/sitemap.xml
+
+### Behavior
+- `robots.txt` allows crawling of `/`, does **not** block `/_next/`, images, service areas, blog, or quote pages.
+- Only `/api/` is disallowed (quote API and future internal endpoints).
+- Sitemap includes all public indexable marketing pages with trailing slashes (matches `trailingSlash: true`).
+- Privacy and Terms are **noindex** and are intentionally **excluded** from the sitemap.
+- City pages are generated from `business.primaryCities`.
+- Secondary services are generated from `business.services` (non-primary).
+- Blog posts are generated from `src/content/blog.ts` (uses each post’s `dateModified`).
+- Static pages omit `lastModified` so every deploy does not fake a content update.
+
+### Adding new pages
+1. Add a city to `business.primaryCities` **or** a blog post to `blogPosts` — sitemap updates automatically.
+2. For other new indexable routes, add one entry to the `staticPages` list in `src/app/sitemap.ts`.
+3. Keep `noindex` pages out of the sitemap.
+
+### Search Console
+After production deploy (and custom domain attachment), submit:
+
+`https://azgutterguardians.com/sitemap.xml`
+
+in Google Search Console.
+
+---
+
 ## 7. Structured data strategy
 
 See `/docs/SCHEMA.md` for entity details.

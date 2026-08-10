@@ -21,7 +21,7 @@ const displayFont = Source_Serif_4({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(business.url),
+  metadataBase: new URL(business.siteUrl),
   title: {
     default: `${business.name} | Gutter Guard Installation White Mountains AZ`,
     template: `%s | ${business.name}`,

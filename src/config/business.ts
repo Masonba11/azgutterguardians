@@ -7,6 +7,9 @@ export const business = {
   name: "Arizona Gutter Guardians",
   legalName: "Arizona Gutter Guardians",
   domain: "azgutterguardians.com",
+  /** Canonical production origin (non-www). Use for robots, sitemap, canonicals, OG. */
+  siteUrl: "https://azgutterguardians.com",
+  /** Alias of siteUrl — kept for existing imports */
   url: "https://azgutterguardians.com",
   /** Stable schema.org entity ID */
   schemaId: "https://azgutterguardians.com/#business",
@@ -108,7 +111,10 @@ export const business = {
 
 export type CitySlug = (typeof business.primaryCities)[number]["slug"];
 
-export function absoluteUrl(path: string): string {
+export function absoluteUrl(path: string = "/"): string {
+  if (!path || path === "/") {
+    return `${business.siteUrl}/`;
+  }
   const normalized = path.startsWith("/") ? path : `/${path}`;
-  return `${business.url}${normalized}`;
+  return `${business.siteUrl}${normalized}`;
 }
