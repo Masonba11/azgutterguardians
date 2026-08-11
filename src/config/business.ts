@@ -14,8 +14,8 @@ export const business = {
   /** Stable schema.org entity ID */
   schemaId: "https://azgutterguardians.com/#business",
 
-  phoneDisplay: "(XXX) XXX-XXXX",
-  phoneTel: "tel:+1XXXXXXXXXX",
+  phoneDisplay: "(928) 224-9544",
+  phoneTel: "tel:+19282249544",
 
   email: "info@azgutterguardians.com",
 
